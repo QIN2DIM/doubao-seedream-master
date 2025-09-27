@@ -47,12 +47,12 @@ parameters:
     required: true
     default: "doubao-seedream-4-0-250828"
     label:
-      en_US: "Imagine Model ID"
-      zh_Hans: "生成模型 ID"
-      pt_BR: "Imagine Model ID"
+      en_US: "Model"
+      zh_Hans: "模型"
+      pt_BR: "Model"
     human_description:
-      en_US: "Model ID for text-to-image generation. Must match a model_id on Volcengine."
-      zh_Hans: "文生图模型ID。必须是 Volcengine 上的 model_id。"
+      en_US: "Model name for text-to-image generation. Must match a model_id on Volcengine."
+      zh_Hans: "模型名。必须是 Volcengine 上的 model_id。"
       pt_BR: "ID do modelo para geração texto-imagem. Deve corresponder a um model_id na Volcengine."
     llm_description: "Volcengine text-to-image model_id required for generation."
     form: form

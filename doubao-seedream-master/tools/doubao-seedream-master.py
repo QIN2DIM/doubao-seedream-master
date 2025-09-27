@@ -7,10 +7,10 @@ import httpx
 from dify_plugin import Tool
 from dify_plugin.entities.tool import ToolInvokeMessage
 from dify_plugin.file.file import File
+from loguru import logger
 from pydantic import BaseModel, Field
 from volcenginesdkarkruntime import Ark
 from volcenginesdkarkruntime.types.images import SequentialImageGenerationOptions
-from loguru import logger
 
 
 class ToolPayload(BaseModel):
@@ -96,15 +96,19 @@ class DoubaoSeedreamMasterTool(Tool):
 
     def _invoke(self, tool_parameters: dict[str, Any]) -> Generator[ToolInvokeMessage]:
         tp = ToolPayload(**tool_parameters)
+        print(tp)
 
         try:
             stream = self._generate(tp)
         except Exception as exc:
+            logger.exception(exc)
             yield self.create_log_message(
                 label="Exception: Unable to request image generation",
                 data={"error": f"Error when invoke ARK model `{tp.model}` - error={exc}"},
             )
             return
+
+        pending_blob_seq = []
 
         try:
             for event in stream:
@@ -112,9 +116,9 @@ class DoubaoSeedreamMasterTool(Tool):
                     continue
 
                 event_type: str | None = getattr(event, "type", None)
-                if event_type == "image_generation.completed":
-                    return
-                if event_type == "image_generation.partial_succeeded":
+                if event_type in ["image_generation.completed"]:
+                    break
+                if event_type in "image_generation.partial_succeeded":
                     image_b64_json = getattr(event, "b64_json", None)
                     if image_b64_json:
                         content = base64.b64decode(image_b64_json)
@@ -125,8 +129,11 @@ class DoubaoSeedreamMasterTool(Tool):
                         yield self.create_text_message(
                             f"\n![{filename}]({upload_file_response.preview_url})\n"
                         )
-                        yield self.create_blob_message(
-                            blob=content, meta={"filename": filename, "mime_type": "image/jpeg"}
+                        pending_blob_seq.append(
+                            {
+                                "blob": content,
+                                "meta": {"filename": filename, "mime_type": "image/jpeg"},
+                            }
                         )
                     continue
         except Exception as exc:
@@ -136,3 +143,9 @@ class DoubaoSeedreamMasterTool(Tool):
                 data={"error": f"Error when processing ARK stream `{tp.model}` - error={exc}"},
             )
             yield self.create_text_message(str(exc))
+
+        for blob_params in pending_blob_seq:
+            try:
+                yield self.create_blob_message(**blob_params)
+            except Exception as exc:
+                logger.exception(exc)
