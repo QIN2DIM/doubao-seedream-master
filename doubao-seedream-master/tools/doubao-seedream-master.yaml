@@ -11,20 +11,98 @@ description:
     zh_Hans: "doubao seedream image generator"
     pt_BR: "doubao seedream image generator"
   llm: "doubao seedream image generator"
+
+# https://www.volcengine.com/docs/82379/1541523
 parameters:
-  - name: query
+  - name: prompt
     type: string
     required: true
+    default: "A mysterious girl walking down the corridor."
     label:
-      en_US: Query string
-      zh_Hans: 查询语句
-      pt_BR: Query string
+      en_US: "Prompt"
+      zh_Hans: "提示词"
+      pt_BR: "Prompt"
     human_description:
-      en_US: "doubao seedream image generator"
-      zh_Hans: "doubao seedream image generator"
-      pt_BR: "doubao seedream image generator"
-    llm_description: "doubao seedream image generator"
+      zh_Hans: "用于生成图像的提示词，支持中英文。建议不超过300个汉字或600个英文单词。字数过多信息容易分散，模型可能因此忽略细节，只关注重点，造成图片缺失部分元素。"
+      en_US: "Prompt text for image generation. Supports Chinese and English input. Recommended length: within 300 Chinese characters or 600 English words to avoid losing key details."
+      pt_BR: "Texto de prompt para geração de imagem. Suporta entradas em chinês e inglês. Tamanho recomendado: até 300 caracteres chineses ou 600 palavras em inglês para evitar perda de detalhes importantes."
+    llm_description: "Prompt text for image generation; supports Chinese and English."
     form: llm
+  # https://docs.dify.ai/zh-hans/plugins/quick-start/develop-plugins/tool-plugin#3-%E5%A1%AB%E5%86%99%E5%B7%A5%E5%85%B7-yaml-%E6%96%87%E4%BB%B6
+  - name: images
+    type: files
+    required: false
+    label:
+      en_US: Images
+      zh_Hans: 图片文件
+      pt_BR: Images
+    human_description:
+      zh_Hans: "输入的图片信息。支持单图或多图输入。"
+      en_US: "Input image files. Supports single or multiple images."
+      pt_BR: "Arquivos de imagem de entrada. Suporta uma ou várias imagens."
+    llm_description: "Input reference images; accepts single or multiple files."
+    form: form
+  - name: model
+    type: string
+    required: true
+    default: "doubao-seedream-4-0-250828"
+    label:
+      en_US: "Imagine Model ID"
+      zh_Hans: "生成模型 ID"
+      pt_BR: "Imagine Model ID"
+    human_description:
+      en_US: "Model ID for image generation. Must be an AIGC model ID from Volcengine."
+      zh_Hans: "文生图模型ID。必须是 Volcengine 上的AIGC模型ID。"
+      pt_BR: "Model ID for image generation. Must be an AIGC model ID from Volcengine."
+    llm_description: "Volcengine AIGC model ID for image generation."
+    form: form
+  - name: size
+    type: select
+    required: false
+    default: "4k"
+    label:
+      en_US: "Size"
+      zh_Hans: "图片分辨率"
+      pt_BR: "Size"
+    options:
+      - label:
+          en_US: "1k"
+          zh_Hans: "1k"
+          pt_BR: "1k"
+        value: "1k"
+      - label:
+          en_US: "2k"
+          zh_Hans: "2k"
+          pt_BR: "2k"
+        value: "2k"
+      - label:
+          en_US: "4k"
+          zh_Hans: "4k"
+          pt_BR: "4k"
+        value: "4k"
+    human_description:
+      zh_Hans: "指定生成图像的分辨率，可选值：1K、2K、4K。"
+      en_US: "Specify the resolution of the generated image. Available options: 1K, 2K, 4K."
+      pt_BR: "Especifica a resolução da imagem gerada. Opções disponíveis: 1K, 2K, 4K."
+    llm_description: "Specify the resolution for the generated image: choose 1K, 2K, or 4K."
+    form: form
+  - name: seed
+    type: number
+    required: false
+    default: -1
+    min: -1
+    max: 2147483647
+    label:
+      en_US: "Seed"
+      zh_Hans: "随机种子"
+      pt_BR: "Seed"
+    human_description:
+      zh_Hans: "随机种子，用于控制图像生成的随机性。相同的种子将生成相同的图像。取值范围：0到2147483647（2^31-1）。"
+      en_US: "Random seed for controlling image generation randomness. Same seed produces same image. Range: 0 to 2147483647 (2^31-1)."
+      pt_BR: "Random seed for controlling image generation randomness. Same seed produces same image. Range: 0 to 2147483647 (2^31-1)."
+    llm_description: "Random seed for reproducible generation. Valid range: 0 to 2147483647 (2^31-1)."
+    form: form
+
 extra:
   python:
     source: tools/doubao-seedream-master.py
