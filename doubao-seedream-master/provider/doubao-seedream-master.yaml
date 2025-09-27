@@ -1,3 +1,20 @@
+credentials_for_provider:
+  ARK_BASE_URL:
+    label:
+      en_US: "ARK_BASE_URL"
+      zh_Hans: "ARK_BASE_URL"
+      pt_BR: "ARK_BASE_URL"
+    required: false
+    type: text-input
+    default: "https://ark.cn-beijing.volces.com/api/v3"
+  ARK_API_KEY:
+    label:
+      en_US: "ARK_API_KEY"
+      zh_Hans: "ARK_API_KEY"
+      pt_BR: "ARK_API_KEY"
+    required: true
+    type: secret-input
+    url: "https://console.volcengine.com/ark/region:ark+cn-beijing/apiKey"
 identity:
   author: "qin2dim"
   name: "doubao-seedream-master"
