@@ -2,6 +2,8 @@
 
 Doubao Seedream Plugin for Dify
 
+<img src="docs/DoubaoSeedreamMaster.png" style="zoom:33%;" />
+
 https://github.com/langgenius/dify-plugin-daemon/releases
 
 ```bash
