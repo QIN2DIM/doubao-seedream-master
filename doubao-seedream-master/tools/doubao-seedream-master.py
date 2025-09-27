@@ -126,7 +126,7 @@ class DoubaoSeedreamMasterTool(Tool):
                             f"\n![{filename}]({upload_file_response.preview_url})\n"
                         )
                         yield self.create_blob_message(
-                            blob=content, meta={"filename": filename, "mimetype": "image/jpeg"}
+                            blob=content, meta={"filename": filename, "mime_type": "image/jpeg"}
                         )
                     continue
         except Exception as exc:
