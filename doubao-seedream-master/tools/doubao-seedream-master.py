@@ -135,3 +135,4 @@ class DoubaoSeedreamMasterTool(Tool):
                 label="Exception: Streaming iteration failed",
                 data={"error": f"Error when processing ARK stream `{tp.model}` - error={exc}"},
             )
+            yield self.create_text_message(str(exc))
