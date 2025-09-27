@@ -1,4 +1,5 @@
 import base64
+import hashlib
 from collections.abc import Generator
 from typing import Any, List
 
@@ -67,6 +68,7 @@ class ToolPayload(BaseModel):
 class DoubaoSeedreamMasterTool(Tool):
     """
     https://www.volcengine.com/docs/82379/1541523
+    https://docs.dify.ai/zh-hans/plugins/quick-start/develop-plugins/tool-plugin#3-%E5%A1%AB%E5%86%99%E5%B7%A5%E5%85%B7-yaml-%E6%96%87%E4%BB%B6
     """
 
     DEFAULT_ARK_BASE_URL = "https://ark.cn-beijing.volces.com/api/v3"
@@ -79,31 +81,57 @@ class DoubaoSeedreamMasterTool(Tool):
 
         reference_images = tp.to_seedream_images()
 
-        images_response = client.images.generate(
+        return client.images.generate(
             model=tp.model,
             prompt=tp.prompt,
             size=tp.size,
             image=reference_images,
             sequential_image_generation="auto",
             sequential_image_generation_options=SequentialImageGenerationOptions(max_images=9),
-            response_format="url",
+            response_format="b64_json",
             watermark=False,
             seed=tp.seed,
+            stream=True,
         )
-        return images_response
 
     def _invoke(self, tool_parameters: dict[str, Any]) -> Generator[ToolInvokeMessage]:
         tp = ToolPayload(**tool_parameters)
 
-        images_response = self._generate(tp)
+        try:
+            stream = self._generate(tp)
+        except Exception as exc:
+            yield self.create_log_message(
+                label="Exception: Unable to request image generation",
+                data={"error": f"Error when invoke ARK model `{tp.model}` - error={exc}"},
+            )
+            return
 
-        yield self.create_log_message(label="Generated images", data=tp.model_dump(mode="json"))
+        try:
+            for event in stream:
+                if event is None:
+                    continue
 
-        for image in images_response.data:
-            try:
-                yield self.create_image_message(image_url=image.url)
-            except Exception as e:
-                yield self.create_log_message(
-                    label="Exception: Unable to return image response",
-                    data={"error": f"Error when invoke ARK model `{tp.model}` - error={e}"},
-                )
+                event_type: str | None = getattr(event, "type", None)
+                if event_type == "image_generation.completed":
+                    return
+                if event_type == "image_generation.partial_succeeded":
+                    image_b64_json = getattr(event, "b64_json", None)
+                    if image_b64_json:
+                        content = base64.b64decode(image_b64_json)
+                        filename = f"{hashlib.sha256(content).hexdigest()}.jpeg"
+                        upload_file_response = self.session.file.upload(
+                            filename=filename, content=content, mimetype="image/jpeg"
+                        )
+                        yield self.create_text_message(
+                            f"\n![{filename}]({upload_file_response.preview_url})\n"
+                        )
+                        yield self.create_blob_message(
+                            blob=content, meta={"filename": filename, "mimetype": "image/jpeg"}
+                        )
+                    continue
+        except Exception as exc:
+            logger.exception(exc)
+            yield self.create_log_message(
+                label="Exception: Streaming iteration failed",
+                data={"error": f"Error when processing ARK stream `{tp.model}` - error={exc}"},
+            )
