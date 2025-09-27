@@ -1,0 +1,30 @@
+identity:
+  name: "doubao-seedream-master"
+  author: "qin2dim"
+  label:
+    en_US: "doubao-seedream-master"
+    zh_Hans: "doubao-seedream-master"
+    pt_BR: "doubao-seedream-master"
+description:
+  human:
+    en_US: "doubao seedream image generator"
+    zh_Hans: "doubao seedream image generator"
+    pt_BR: "doubao seedream image generator"
+  llm: "doubao seedream image generator"
+parameters:
+  - name: query
+    type: string
+    required: true
+    label:
+      en_US: Query string
+      zh_Hans: 查询语句
+      pt_BR: Query string
+    human_description:
+      en_US: "doubao seedream image generator"
+      zh_Hans: "doubao seedream image generator"
+      pt_BR: "doubao seedream image generator"
+    llm_description: "doubao seedream image generator"
+    form: llm
+extra:
+  python:
+    source: tools/doubao-seedream-master.py

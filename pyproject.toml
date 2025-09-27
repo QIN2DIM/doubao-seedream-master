@@ -1,0 +1,17 @@
+[project]
+name = "doubao-seedream-master"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "dify-plugin>=0.4.5",
+    "loguru>=0.7.3",
+    "volcengine-python-sdk[ark]>=4.0.20",
+]
+
+[dependency-groups]
+dev = [
+    "black>=25.1.0",
+    "ruff>=0.13.0",
+]
